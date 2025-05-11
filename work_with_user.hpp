@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "message.hpp"
+#include "link_generate.hpp"
 
 void WorkWithUser() {
 	auto storage = InitDatabase("messages.db");
@@ -19,8 +20,12 @@ void WorkWithUser() {
 		if (!(std::cin >> choice)) {
 			std::cin.clear();
 			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			continue;
+			choice = 0;
 		}
+		else {
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+
 
 		switch (choice) {
 			
@@ -28,17 +33,14 @@ void WorkWithUser() {
 			{
 				std::cout << "Введите текст сообщения: ";
 				std::string user_text;
-				std::cin >> user_text;
+				std::getline(std::cin, user_text);
 
 				bool do_link = true;
 
 				while (do_link) {
-					std::cout << "Придумайте ссылку: ";
-					std::string user_link;
-					std::cin >> user_link;
+					std::string user_link = GenerateRandomLink(8);
 
 					if (storage.count<Message>(sql::where(sql::c(&Message::hash) == user_link)) > 0) {
-						std::cout << "Эта ссылка уже занята, попробуйте другую\n";
 						continue;
 					}
 
@@ -74,13 +76,17 @@ void WorkWithUser() {
 				break;
 			}
 
+			case 3:
+			{
+				std::cout << "Выход\n\n\n";
+				break;
+			}
+
 			default:
 				std::cout << "Неверный выбор\n\n\n";
 				break;
 
 		}
-
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 	} while (choice != 3);
 }
