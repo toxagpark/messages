@@ -9,12 +9,14 @@
 void WorkWithUser() {
 	auto storage = InitDatabase("messages.db");
 	storage.sync_schema();
+	DeleteOldMessages(storage);
 
 	int choice = 0;
 	do {
 		std::cout << "1. Добавить новое сообщение\n"
 			<< "2. Найти сообщение\n"
-			<< "3. ВЫХОД\n"
+			<< "3. Вывод всех сообщений\n"
+			<< "4. ВЫХОД\n"
 			<< "Ввод: ";
 
 		if (!(std::cin >> choice)) {
@@ -44,7 +46,8 @@ void WorkWithUser() {
 						continue;
 					}
 
-					Message new_message{ user_text, user_link };
+					const auto now_time = std::time(nullptr);
+					Message new_message{ user_text, user_link, now_time };
 
 					try {
 						storage.insert(new_message);
@@ -78,6 +81,20 @@ void WorkWithUser() {
 
 			case 3:
 			{
+				auto messages = storage.get_all<Message>();
+				if (!messages.empty()) {
+					for (const auto& message : messages) {
+						std::cout << message.text << "\nLink: " << message.hash << "\n\n\n";
+					}
+				}
+				else {
+					std::cout << "Сообщений нет\n\n\n";
+				}
+				break;
+			}
+
+			case 4:
+			{
 				std::cout << "Выход\n\n\n";
 				break;
 			}
@@ -88,7 +105,7 @@ void WorkWithUser() {
 
 		}
 
-	} while (choice != 3);
+	} while (choice != 4);
 }
 
 #endif WORK_WITH_USER_HPP
